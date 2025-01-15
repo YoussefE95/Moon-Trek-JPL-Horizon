@@ -43,7 +43,7 @@ const earth = new THREE.Mesh(
     new THREE.SphereGeometry(6371, 30, 30),
     new THREE.MeshPhongMaterial({
         map: new THREE.TextureLoader().load(
-            'http://localhost:8888/static/textures/earth.jpg'
+            'http://localhost:8890/moon-trek/images/textures/earth.jpg'
         ),
         shininess: 0
     })
@@ -52,7 +52,7 @@ const moon = new THREE.Mesh(
     new THREE.SphereGeometry(1737, 30, 30),
     new THREE.MeshPhongMaterial({
         map: new THREE.TextureLoader().load(
-            'http://localhost:8888/static/textures/overlay.png'
+            'http://localhost:8890/moon-trek/images/textures/overlay.png'
         ),
         shininess: 0
     })
@@ -91,7 +91,7 @@ const inputImage = (event) => {
 const sendImages = async () => {
     const { data } = await axios({
         method: 'post',
-        url: 'http://localhost:8888/registration',
+        url: 'http://localhost:8890/moon-trek/registration',
         data: { 
             user: input.image,
             real: result.model.images.real,
@@ -114,7 +114,7 @@ const getPositions = async () => {
 
     const { data } = await axios({
         method: 'get',
-        url: 'http://localhost:8888/positions',
+        url: 'http://localhost:8890/moon-trek/positions',
         params: {
             start: startStr,
             stop: stopStr,
@@ -225,7 +225,7 @@ const togglePerspective = () => {
 
 const setTexture = async (texture) => {
     moon.material.map = await new THREE.TextureLoader().loadAsync(
-        `http://localhost:8888/static/textures/${texture}`
+        `http://localhost:8890/moon-trek/images/textures/${texture}`
     )
 }
 
@@ -333,20 +333,20 @@ onMounted(async () => {
         <div v-if="result.timestamp">
             <div class="row align-items-center">
                 <div class="col text-center">
-                    <img :src="`http://localhost:8888/static/results/${result.timestamp}/detected-circles.png`" />
+                    <img :src="`http://localhost:8890/moon-trek/images/results/${result.timestamp}/detected-circles.png`" />
                 </div>
             </div>
             <div class="row align-items-center">
                 <div class="col text-center">
-                    <img :src="`http://localhost:8888/static/results/${result.timestamp}/detected-matches.png`" />
+                    <img :src="`http://localhost:8890/moon-trek/images/results/${result.timestamp}/detected-matches.png`" />
                 </div>
             </div>
             <div class="row align-items-center">
                 <div class="col text-center">
-                    <img :src="`http://localhost:8888/static/results/${result.timestamp}/cropped.png`" />
+                    <img :src="`http://localhost:8890/moon-trek/images/results/${result.timestamp}/cropped.png`" />
                 </div>
                 <div class="col text-center">
-                    <img :src="`http://localhost:8888/static/results/${result.timestamp}/stacked.png`" />
+                    <img :src="`http://localhost:8890/moon-trek/images/results/${result.timestamp}/stacked.png`" />
                 </div>
             </div>
         </div>

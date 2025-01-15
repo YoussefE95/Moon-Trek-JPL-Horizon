@@ -6,16 +6,16 @@ const express = require('express');
 const cors = require('cors');
 
 const app = express();
-const port = 8888;
+const port = 8890;
 
 app.use(express.json({
     limit: '10mb'
 }));
 app.use(cors());
 
-app.use('/static', express.static('static'));
+app.use('/moon-trek/images', express.static('static'));
 
-app.get('/positions', async (req, res) => {
+app.get('/moon-trek/positions', async (req, res) => {
     try {
         const { start, stop, index } = req.query;
 
@@ -41,7 +41,7 @@ const writeDataUrl = async (name, dataUrl) => {
 
     await fs.writeFile(name, buffer);
 };
-app.post('/registration', async (req, res) => {
+app.post('/moon-trek/registration', async (req, res) => {
     try {
         const { user, real, layer } = req.body;
         const timestamp = Date.now();
