@@ -286,7 +286,7 @@ onMounted(async () => {
 <main>
     <div class="row align-items-center">
         <div class="col text-center">
-            <input type="file" v-on:change="inputImage"/>
+            <input id="fileInput" type="file" v-on:change="inputImage"/>
         </div>
         <div class="col text-center">
             <input type="date" v-model="input.date"/>
@@ -356,6 +356,14 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+:global(body) {
+  background-color: #282828;
+}
+
+#fileInput {
+    color: white;
+}
+
 .row {
     margin: 1.25rem 0rem;
 }
