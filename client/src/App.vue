@@ -1,7 +1,10 @@
 <script setup>
-import axios from 'axios'
-import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import * as THREE from 'three'
+import { getTimezoneOffset } from 'date-fns-tz'
+import tzloopup from '@photostructure/tz-lookup'
+import parser from  'exif-parser'
+import axios from 'axios'
 import { onMounted, reactive } from 'vue'
 
 const input = reactive({
@@ -76,15 +79,50 @@ const rectToCart = () => {
     }
 }
 
+const padVal = (val) => {
+    return String(val).padStart(2, '0')
+}
+
 const inputImage = (event) => {
     if (event.target.files) {
-        const reader = new FileReader();
+        try {
+            const reader = new FileReader();
 
-        reader.onloadend = () => {
-            input.image = reader.result
+            reader.onloadend = () => {
+                input.image = reader.result
+            }
+
+            reader.readAsDataURL(event.target.files[0])
+        } catch (error) {
+            console.log("Couldn't read image")
         }
 
-        reader.readAsDataURL(event.target.files[0])
+        try {
+            const reader = new FileReader();
+
+            reader.onloadend = () => {
+                const { tags } = parser.create(reader.result).parse()
+
+                if (tags.DateTimeOriginal) {
+                    const date = new Date(tags.DateTimeOriginal * 1000)
+                    input.date = `${date.getUTCFullYear()}-${padVal(date.getUTCMonth())}-${padVal(date.getUTCDate())}`
+                    input.time = `${padVal(date.getUTCHours())}:${padVal(date.getUTCMinutes())}`
+                } else {
+                    console.log('No date EXIF data')
+                }
+
+                if (tags.GPSLatitude && tags.GPSLongitude) {
+                    input.lat = tags.GPSLatitude
+                    input.lon = tags.GPSLongitude
+                } else {
+                    console.log('No gps EXIF data')
+                }
+            }
+
+            reader.readAsArrayBuffer(event.target.files[0])
+        } catch (error) {
+            console.log('No EXIF data')
+        }
     }
 }
 
@@ -102,22 +140,31 @@ const sendImages = async () => {
     result.timestamp = data.timestamp
 }
 
-const getPositions = async () => {
-    const start = new Date(`${input.date}T${input.time}`)
-    const stop = new Date(start)
-    stop.setDate(start.getDate() + 1)
+const getDateRange = () => {
+    const utcDate = new Date(`${input.date}T${input.time}`)
+    utcDate.setMilliseconds(
+        utcDate.getMilliseconds() +
+        (-1.0 * getTimezoneOffset(tzloopup(input.lat, input.lon)))
+    )
 
-    const startStr =
-        `${start.getUTCFullYear()}-${start.getUTCMonth()+1}-${start.getUTCDate()}`
-    const stopStr =
-        `${stop.getUTCFullYear()}-${stop.getUTCMonth()+1}-${stop.getUTCDate()}`
+    const utcNext = new Date(utcDate)
+    utcNext.setDate(utcDate.getDate() + 1)
+
+    return {
+        start: `${utcDate.getUTCFullYear()}-${utcDate.getUTCMonth()}-${utcDate.getUTCDate()}`,
+        stop: `${utcNext.getUTCFullYear()}-${utcNext.getUTCMonth()}-${utcNext.getUTCDate()}`
+    }
+}
+
+const getPositions = async () => {
+    const { start, stop } = getDateRange()
 
     const { data } = await axios({
         method: 'get',
         url: 'http://localhost:8890/moon-trek/positions',
         params: {
-            start: startStr,
-            stop: stopStr,
+            start,
+            stop,
             index: Number(input.time.split(':')[0])
         }
     })
@@ -333,7 +380,10 @@ onMounted(async () => {
         <div v-if="result.timestamp">
             <div class="row align-items-center">
                 <div class="col text-center">
-                    <img :src="`http://localhost:8890/moon-trek/images/results/${result.timestamp}/detected-circles.png`" />
+                    <img :src="`http://localhost:8890/moon-trek/images/results/${result.timestamp}/cropped.png`" />
+                </div>
+                <div class="col text-center">
+                    <img :src="`http://localhost:8890/moon-trek/images/results/${result.timestamp}/stacked.png`" />
                 </div>
             </div>
             <div class="row align-items-center">
@@ -343,10 +393,7 @@ onMounted(async () => {
             </div>
             <div class="row align-items-center">
                 <div class="col text-center">
-                    <img :src="`http://localhost:8890/moon-trek/images/results/${result.timestamp}/cropped.png`" />
-                </div>
-                <div class="col text-center">
-                    <img :src="`http://localhost:8890/moon-trek/images/results/${result.timestamp}/stacked.png`" />
+                    <img :src="`http://localhost:8890/moon-trek/images/results/${result.timestamp}/detected-circles.png`" />
                 </div>
             </div>
         </div>
