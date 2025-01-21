@@ -151,8 +151,8 @@ const getDateRange = () => {
     utcNext.setDate(utcDate.getDate() + 1)
 
     return {
-        start: `${utcDate.getUTCFullYear()}-${utcDate.getUTCMonth()}-${utcDate.getUTCDate()}`,
-        stop: `${utcNext.getUTCFullYear()}-${utcNext.getUTCMonth()}-${utcNext.getUTCDate()}`
+        start: `${padVal(utcDate.getUTCFullYear())}-${padVal(utcDate.getUTCMonth()+1)}-${padVal(utcDate.getUTCDate())}`,
+        stop: `${padVal(utcNext.getUTCFullYear())}-${padVal(utcNext.getUTCMonth()+1)}-${padVal(utcNext.getUTCDate())}`
     }
 }
 
