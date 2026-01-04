@@ -397,6 +397,13 @@ onMounted(async () => {
                 </div>
             </div>
         </div>
+        <div v-else>
+            <div class="row align-items-center">
+                <div class="col text-center">
+                    <p>Waiting for results</p>
+                </div>
+            </div>
+        </div>
     </div>
     <div id="model-canvas" v-show="result.view === 'model'"></div>
 </main>

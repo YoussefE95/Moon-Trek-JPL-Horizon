@@ -1,6 +1,6 @@
 const { getEphemeris, parse } = require('./ephemeris.js');
 const util = require('util');
-const exec = util.promisify(require('child_process').exec);
+const exec = util.promisify(require('child_process').execFile);
 const fs = require('fs/promises');
 const express = require('express');
 const cors = require('cors');
@@ -9,9 +9,12 @@ const app = express();
 const port = 8890;
 
 app.use(express.json({
-    limit: '10mb'
+    limit: '20mb'
 }));
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true
+}));
 
 app.use('/moon-trek/images', express.static('static'));
 
@@ -53,7 +56,7 @@ app.post('/moon-trek/registration', async (req, res) => {
         await writeDataUrl(`${path}/real.png`, real);
         await writeDataUrl(`${path}/layer.png`, layer);
 
-        await exec(`docker exec moontrek-opencv ./build/main ${timestamp}`);
+        await exec('./registration/build/main', [ timestamp ]);
 
         res.status(200).json({
             message: 'Success',

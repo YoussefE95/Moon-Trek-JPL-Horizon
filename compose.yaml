@@ -1,0 +1,38 @@
+services:
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: moontrek-client
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client:/usr/src/moontrek-client
+      - /usr/src/moontrek-client/node_modules
+    #user: "${UID:-1000}:${GID:-1000}"
+    stdin_open: true
+    tty: true
+    depends_on:
+      - server
+    networks:
+      - moontrek-network
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: moontrek-server
+    ports:
+      - "8890:8890"
+    volumes:
+      - ./server:/usr/src/moontrek-server
+      - /usr/src/moontrek-server/node_modules
+    #user: "${UID:-1000}:${GID:-1000}"
+    stdin_open: true
+    tty: true
+    networks:
+      - moontrek-network
+
+networks:
+  moontrek-network:
+    driver: bridge

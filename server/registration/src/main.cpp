@@ -20,7 +20,7 @@ void writeMatchedPoints(
 
 int main(int argc, char* argv[]) {
     std::string timestamp = argv[1];
-    std::string path = "../Images/" + timestamp;
+    std::string path = "./static/results/" + timestamp; // "../images/"
     cv::Mat src, trg, lyr;
 
     src = cv::imread(
